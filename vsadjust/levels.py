@@ -1,12 +1,13 @@
 from typing import Sequence
 
-from vstools import (
-    ColorRange, ColorRangeT, FunctionUtil, PlanesT, get_lowest_values, get_peak_values, normalize_seq, scale_value, vs
-)
+from vstools import (ColorRange, ColorRangeT, DitherType, FunctionUtil, PlanesT, depth,
+                     get_lowest_values, get_peak_values, normalize_seq, scale_value, vs)
 
 
 __all__ = [
-    'fix_levels', 'fix_range_levels'
+    'fix_levels', 'fix_range_levels',
+
+    'fix_double_range'
 ]
 
 
@@ -80,3 +81,11 @@ def fix_range_levels(
     max_in = max_out = get_peak_values(clip, color_range)
 
     return fix_levels(clip, gamma, min_in, min_out, max_in, max_out, None, planes)
+
+
+def fix_double_range(clip: vs.VideoNode) -> vs.VideoNode:
+    fix = depth(
+        clip, range_in=ColorRange.LIMITED, range_out=ColorRange.FULL, dither_type=DitherType.ERROR_DIFFUSION
+    )
+
+    return ColorRange.LIMITED.apply(fix)
