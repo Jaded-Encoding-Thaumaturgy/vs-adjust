@@ -1,4 +1,4 @@
-"""VapourSynth denoising functions"""
+"""VapourSynth functions for adjusting luma/chroma values"""
 
 __version__ = '0.0.0'
 
