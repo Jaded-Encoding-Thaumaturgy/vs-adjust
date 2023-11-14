@@ -1,10 +1,10 @@
 # vs-adjust
 
-### VapourSynth edgefixing and colour fix functions
+### VapourSynth edgefixing and color fix functions
 
 <br>
 
-Wrappers for edgefixing and colour fix.
+Wrappers for edgefixing and color fix.
 
 For support you can check out the [JET Discord server](https://discord.gg/XTpc6Fa9eB). <br><br>
 
