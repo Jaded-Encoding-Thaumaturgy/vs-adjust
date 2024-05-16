@@ -1,8 +1,9 @@
 from typing import Sequence
 
+from vsmasktools import rekt_partial
 from vstools import (
-    ColorRange, ColorRangeT, DitherType, FunctionUtil, PlanesT, depth, get_lowest_values, get_peak_values,
-    normalize_seq, scale_value, vs
+    ColorRange, ColorRangeT, DitherType, FunctionUtil, PlanesT, depth, get_lowest_value, get_lowest_values,
+    get_peak_value, get_peak_values, normalize_seq, scale_value, vs
 )
 
 __all__ = [
@@ -94,8 +95,8 @@ def fix_double_range(clip: vs.VideoNode) -> vs.VideoNode:
 
 def fix_line_brightness(
     clip: vs.VideoNode,
-    rows: Dict[int, float] = {},
-    columns: Dict[int, float] = {},
+    rows: dict[int, float] = {},
+    columns: dict[int, float] = {},
 ) -> vs.VideoNode:
     """
     Fix darkened or brightened luma rows or columns using manual level adjustments.
@@ -122,9 +123,9 @@ def fix_line_brightness(
             raise ValueError("fix_line_brightness: adjustment values must be in (-100, 100)")
 
         if adjustment > 0:
-            adj = lambda c: fix_levels(c, max_in=peak - low_to_peak * adjustment / 100, max_out=peak)
+            adj = lambda c: fix_levels(c, max_in=peak - low_to_peak * adjustment / 100, max_out=peak)  # noqa: E731
         elif adjustment < 0:
-            adj = lambda c: fix_levels(c, min_in=low + low_to_peak * adjustment / 100, min_out=low)
+            adj = lambda c: fix_levels(c, min_in=low + low_to_peak * adjustment / 100, min_out=low)  # noqa: E731
         else:
             return clip
         if is_row:
