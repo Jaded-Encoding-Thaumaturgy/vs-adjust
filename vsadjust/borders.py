@@ -1,7 +1,9 @@
 from __future__ import annotations
 
-from vstools import (CustomStrEnum, CustomValueError, FunctionUtil, KwargsT,
-                     PlanesT, core, vs)
+from itertools import chain
+from typing import Sequence
+
+from vstools import CustomStrEnum, CustomValueError, FunctionUtil, KwargsT, PlanesT, core, vs
 
 __all__ = [
     'bore'
@@ -14,42 +16,42 @@ class _bore(CustomStrEnum):
 
     def __call__(
         self, clip: vs.VideoNode,
-        left: int | list[int] = 0, right: int | list[int] = 0,
-        top: int | list[int] = 0, bottom: int | list[int] = 0,
+        left: int | Sequence[int] = 0, right: int | Sequence[int] = 0,
+        top: int | Sequence[int] = 0, bottom: int | Sequence[int] = 0,
         planes: PlanesT = None, **kwargs: KwargsT
     ) -> vs.VideoNode:
         func = FunctionUtil(clip, 'bore', planes, vs.YUV, 32)
 
-        for param in ('left', 'right', 'top', 'bottom', 'plane'):
-            kwargs.pop(param, None)
+        values = list(map(func.norm_seq, (left, right, top, bottom)))
 
-        if any((left, right, top, bottom)) < 0:
+        if any(x < 0 for x in chain(*values)):
             raise CustomValueError('Negative values are not allowed!', func.func)
 
-        if not any((left, right, top, bottom)):
+        if not any(x != 0 for x in chain(*values)):
             return clip
 
         try:
-            if self.value == 'fix_brightness':
-                plugin = core.bore.FixBrightness  # type:ignore
-            else:  # elif self.value == 'balance':
-                plugin = core.bore.Balance  # type:ignore
+            if self == 'fix_brightness':
+                plugin = core.bore.FixBrightness
+            elif self == 'balance':
+                plugin = core.bore.Balance
+            else:
+                raise AttributeError
         except AttributeError:
             raise CustomValueError(
-                f'Could not find function for \"{self.value}\"! '
-                'Make sure you\'re using an up-to-date version of Bore.',
-                func.func, self.value
+                'Could not find this bore function! Make sure you\'re using an up-to-date version of Bore.',
+                func.func, dict(function=self.value)
             )
-
-        left, right, top, bottom = tuple([
-            i if isinstance(i, list) else [i] * func.num_planes
-            for i in (left, right, top, bottom)
-        ])
 
         proc_clip: vs.VideoNode = func.work_clip
 
-        for plane, l, r, t, b in zip(func.norm_planes, left, right, top, bottom):
-            proc_clip = plugin(l, r, t, b, plane=plane, **kwargs)  # type:ignore
+        for plane in func.norm_planes:
+            plane_values = values[plane]
+
+            if not any(x != 0 for x in plane_values):
+                continue
+
+            proc_clip = plugin(proc_clip, *plane_values, plane=plane, **kwargs)  # type:ignore
 
         return func.return_clip(proc_clip)
 
