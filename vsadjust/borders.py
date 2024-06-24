@@ -3,16 +3,16 @@ from __future__ import annotations
 from itertools import chain
 from typing import Sequence
 
-from vstools import CustomStrEnum, CustomValueError, FunctionUtil, KwargsT, PlanesT, core, vs
+from vstools import CustomEnum, CustomValueError, FunctionUtil, KwargsT, PlanesT, core, vs
 
 __all__ = [
     'bore'
 ]
 
 
-class _bore(CustomStrEnum):
-    FIX_BRIGHTNESS: _bore = 'fix_brightness'  # type:ignore
-    BALANCE: _bore = 'balance'  # type:ignore
+class bore(CustomEnum):
+    FIX_BRIGHTNESS: bore = object()  # type:ignore
+    BALANCE: bore = object()  # type:ignore
 
     def __call__(
         self, clip: vs.VideoNode,
@@ -31,9 +31,9 @@ class _bore(CustomStrEnum):
             return clip
 
         try:
-            if self == 'fix_brightness':
+            if self == self.FIX_BRIGHTNESS:
                 plugin = core.bore.FixBrightness
-            elif self == 'balance':
+            elif self == self.BALANCE:
                 plugin = core.bore.Balance
             else:
                 raise AttributeError
@@ -54,6 +54,3 @@ class _bore(CustomStrEnum):
             proc_clip = plugin(proc_clip, *plane_values, plane=plane, **kwargs)  # type:ignore
 
         return func.return_clip(proc_clip)
-
-
-bore = _bore.FIX_BRIGHTNESS
