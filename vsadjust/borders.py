@@ -20,7 +20,7 @@ class bore(CustomEnum):
         top: int | Sequence[int] = 0, bottom: int | Sequence[int] = 0,
         planes: PlanesT = None, **kwargs: KwargsT
     ) -> vs.VideoNode:
-        func = FunctionUtil(clip, 'bore', planes, vs.YUV, 32)
+        func = FunctionUtil(clip, self.__class__, planes, vs.YUV, 32)
 
         values = list(map(func.norm_seq, (left, right, top, bottom)))
 
