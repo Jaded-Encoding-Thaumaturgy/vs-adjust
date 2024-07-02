@@ -3,7 +3,7 @@ from __future__ import annotations
 from itertools import chain
 from typing import Sequence
 
-from vstools import CustomEnum, CustomValueError, FunctionUtil, KwargsT, NotFoundEnumValue, PlanesT, core, vs
+from vstools import CustomEnum, CustomValueError, FunctionUtil, KwargsT, NotFoundEnumValue, PlanesT, core, depth, vs
 
 __all__ = [
     'bore'
@@ -57,6 +57,9 @@ class bore(CustomEnum):
             raise NotFoundEnumValue(
                 'Invalid Bore enum!', func.func, dict(member=self, valid_function=bore.__members__.keys())
             )
+
+        if kwargs.get('ignore_mask', False):
+            kwargs['ignore_mask'] = depth(kwargs['ignore_mask'], func.bitdepth)  # type:ignore
 
         proc_clip: vs.VideoNode = func.work_clip
 
