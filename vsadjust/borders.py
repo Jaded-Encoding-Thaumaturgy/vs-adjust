@@ -11,6 +11,11 @@ __all__ = [
 
 
 class bore(CustomEnum):
+    SINGLE_PLANE: bore = object()  # type:ignore
+    SINGLE_PLANE_LIMITED: bore = object()  # type:ignore
+    SINGLE_PLANE_WEIGHTED: bore = object()  # type:ignore
+
+    # Deprecated
     FIX_BRIGHTNESS: bore = object()  # type:ignore
     BALANCE: bore = object()  # type:ignore
 
@@ -22,7 +27,11 @@ class bore(CustomEnum):
     ) -> vs.VideoNode:
         func = FunctionUtil(clip, self.__class__, planes, vs.YUV, 32)
 
-        values = list(map(func.norm_seq, (left, right, top, bottom)))
+        if self in (self.FIX_BRIGHTNESS, self.BALANCE):
+            import warnings
+            warnings.warn(f'{self} is deprecated! Use {self.SINGLE_PLANE}.', UserWarning)
+
+        values = list(map(func.norm_seq, (top, bottom, left, right)))
 
         if any(x < 0 for x in chain(*values)):
             raise CustomValueError('Negative values are not allowed!', func.func)
@@ -31,20 +40,22 @@ class bore(CustomEnum):
             return clip
 
         try:
-            if self == self.FIX_BRIGHTNESS:
-                plugin = core.bore.FixBrightness
-            elif self == self.BALANCE:
-                plugin = core.bore.Balance
+            if self in (self.FIX_BRIGHTNESS, self.BALANCE, self.SINGLE_PLANE):
+                plugin = core.bore.SinglePlane
+            elif self == self.SINGLE_PLANE_LIMITED:
+                plugin = core.bore.SinglePlaneLimited
+            elif self == self.SINGLE_PLANE_WEIGHTED:
+                plugin = core.bore.SinglePlaneWeighted
             else:
                 raise NotFoundEnumValue
         except AttributeError:
             raise CustomValueError(
-                'Could not find this bore function! Make sure you\'re using an up-to-date version of Bore.',
+                'Could not find the given Bore function! Make sure you\'re using an up-to-date version of Bore.',
                 func.func, dict(function=self)
             )
         except NotFoundEnumValue:
             raise NotFoundEnumValue(
-                'Invalid bore enum!', func.func, dict(member=self, valid_function=bore.__members__.keys())
+                'Invalid Bore enum!', func.func, dict(member=self, valid_function=bore.__members__.keys())
             )
 
         proc_clip: vs.VideoNode = func.work_clip
