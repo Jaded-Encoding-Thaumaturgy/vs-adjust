@@ -3,7 +3,7 @@ from __future__ import annotations
 from itertools import chain
 from typing import Sequence
 
-from vstools import CustomEnum, CustomValueError, FunctionUtil, KwargsT, PlanesT, core, vs
+from vstools import CustomEnum, CustomValueError, FunctionUtil, KwargsT, NotFoundEnumValue, PlanesT, core, vs
 
 __all__ = [
     'bore'
@@ -36,11 +36,15 @@ class bore(CustomEnum):
             elif self == self.BALANCE:
                 plugin = core.bore.Balance
             else:
-                raise AttributeError
+                raise NotFoundEnumValue
         except AttributeError:
             raise CustomValueError(
                 'Could not find this bore function! Make sure you\'re using an up-to-date version of Bore.',
-                func.func, dict(function=self.value)
+                func.func, dict(function=self)
+            )
+        except NotFoundEnumValue:
+            raise NotFoundEnumValue(
+                'Invalid bore enum!', func.func, dict(member=self, valid_function=bore.__members__.keys())
             )
 
         proc_clip: vs.VideoNode = func.work_clip
