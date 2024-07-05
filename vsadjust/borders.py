@@ -19,6 +19,7 @@ class bore(CustomEnum):
         self, clip: vs.VideoNode,
         left: int | Sequence[int] = 0, right: int | Sequence[int] = 0,
         top: int | Sequence[int] = 0, bottom: int | Sequence[int] = 0,
+        ignore_mask: vs.VideoNode | Sequence[vs.VideoNode] | None = None,
         planes: PlanesT = None, **kwargs: KwargsT
     ) -> vs.VideoNode:
         func = FunctionUtil(clip, self.__class__, planes, vs.YUV, 32)
@@ -50,8 +51,11 @@ class bore(CustomEnum):
                 'Invalid Bore enum!', func.func, dict(member=self, valid_function=bore.__members__.keys())
             )
 
-        if kwargs.get('ignore_mask', False):
-            kwargs['ignore_mask'] = depth(kwargs['ignore_mask'], func.bitdepth)  # type:ignore
+        ignore_masks = [
+            depth(igmask, func.work_clip.format)
+            if igmask else None
+            for igmask in func.norm_seq(ignore_mask, null=None)
+        ]
 
         proc_clip: vs.VideoNode = func.work_clip
 
@@ -61,6 +65,8 @@ class bore(CustomEnum):
             if not any(x != 0 for x in plane_values):
                 continue
 
-            proc_clip = plugin(proc_clip, *plane_values, plane=plane, **kwargs)  # type:ignore
+            proc_clip = plugin(  # type:ignore
+                proc_clip, *plane_values, plane=plane, ignore_mask=ignore_masks[plane], **kwargs
+            )
 
         return func.return_clip(proc_clip)
