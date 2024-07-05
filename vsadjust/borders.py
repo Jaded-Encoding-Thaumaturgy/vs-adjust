@@ -15,10 +15,6 @@ class bore(CustomEnum):
     SINGLE_PLANE_LIMITED: bore = object()  # type:ignore
     SINGLE_PLANE_WEIGHTED: bore = object()  # type:ignore
 
-    # Deprecated
-    FIX_BRIGHTNESS: bore = object()  # type:ignore
-    BALANCE: bore = object()  # type:ignore
-
     def __call__(
         self, clip: vs.VideoNode,
         left: int | Sequence[int] = 0, right: int | Sequence[int] = 0,
@@ -26,10 +22,6 @@ class bore(CustomEnum):
         planes: PlanesT = None, **kwargs: KwargsT
     ) -> vs.VideoNode:
         func = FunctionUtil(clip, self.__class__, planes, vs.YUV, 32)
-
-        if self in (self.FIX_BRIGHTNESS, self.BALANCE):
-            import warnings
-            warnings.warn(f'{self} is deprecated! Use {self.SINGLE_PLANE}.', UserWarning)
 
         values = list(map(func.norm_seq, (top, bottom, left, right)))
 
@@ -40,7 +32,7 @@ class bore(CustomEnum):
             return clip
 
         try:
-            if self in (self.FIX_BRIGHTNESS, self.BALANCE, self.SINGLE_PLANE):
+            if self == self.SINGLE_PLANE:
                 plugin = core.bore.SinglePlane
             elif self == self.SINGLE_PLANE_LIMITED:
                 plugin = core.bore.SinglePlaneLimited
