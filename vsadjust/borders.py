@@ -22,7 +22,7 @@ class bore(CustomEnum):
     ) -> vs.VideoNode:
         func = FunctionUtil(clip, self.__class__, planes, vs.YUV, 32)
 
-        values = list(map(func.norm_seq, (left, right, top, bottom)))
+        values = list(zip(*map(func.norm_seq, (left, right, top, bottom))))
 
         if any(x < 0 for x in chain(*values)):
             raise CustomValueError('Negative values are not allowed!', func.func)
