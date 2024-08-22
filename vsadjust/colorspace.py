@@ -9,13 +9,13 @@ __all__ = [
 def fix_colorspace_conversion(
     clip: vs.VideoNode,
     matrix_src: Matrix | None = None,
-    matrix_og: Matrix = Matrix.BT601,
+    matrix_og: Matrix = Matrix.BT470BG,
 ) -> vs.VideoNode:
     """
     Function to fix improper colorspace conversions.
 
     An example of this would be a BT709 video that was converted
-    to BT601 during production and tagged as BT709.
+    to BT470BG during production and tagged as BT709.
 
     :param clip:        Clip to process.
     :param matrix_src:  The Matrix of the input clip. This will also be the output matrix.
