@@ -55,6 +55,6 @@ class bore(CustomEnum):
             if not any(x != 0 for x in plane_values):
                 continue
 
-            proc_clip = plugin(proc_clip, *plane_values, plane=plane, **kwargs)  # type:ignore
+            proc_clip = plugin(proc_clip, *plane_values, plane=plane, **kwargs)
 
         return func.return_clip(proc_clip)
