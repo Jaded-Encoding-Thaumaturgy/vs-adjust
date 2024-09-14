@@ -1,7 +1,7 @@
 from typing import Any
 
-from vstools import vs, Matrix, Transfer, Primaries, ColorRange
 from vskernels import Point
+from vstools import ColorRange, DitherType, Matrix, Primaries, Transfer, vs
 
 __all__ = [
     'colorspace_conversion'
@@ -18,9 +18,10 @@ def colorspace_conversion(
         transfer_in: Transfer = None,
         primaries_in: Primaries = None,
         range_in: ColorRange = None,
+        dither_type: DitherType = DitherType.AUTO,
 ) -> vs.VideoNode:
 
-    resample_kwargs = dict[str, Any]()
+    resample_kwargs = dict[str, Any](dither_type=dither_type)
 
     if matrix is not None:
         if matrix_in is not None:
