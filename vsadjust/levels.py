@@ -1,7 +1,7 @@
 from typing import Sequence
 
 from vstools import (
-    ColorRange, ColorRangeT, DitherType, FunctionUtil, PlanesT, depth,
+    ColorRange, ColorRangeT, FunctionUtil, PlanesT, depth,
     get_lowest_values, get_peak_values, normalize_seq, scale_value, vs
 )
 
@@ -13,7 +13,7 @@ __all__ = [
 
 
 def fix_levels(
-    clip: vs.VideoNode, gamma: float = 0.88,
+    clip: vs.VideoNode, gamma: float = 1.0,
     min_in: int | float | Sequence[int | float] | None = None,
     min_out: int | float | Sequence[int | float] | None = None,
     max_in: int | float | Sequence[int | float] | None = None,
@@ -71,7 +71,7 @@ def fix_levels(
 
 
 def fix_range_levels(
-    clip: vs.VideoNode, gamma: float = 0.88, range_in: ColorRangeT = ColorRange.LIMITED, planes: PlanesT = 0
+    clip: vs.VideoNode, gamma: float = 1.0, range_in: ColorRangeT = ColorRange.LIMITED, planes: PlanesT = 0
 ) -> vs.VideoNode:
     color_range = ColorRange.from_param(range_in, fix_range_levels)
 
@@ -82,11 +82,3 @@ def fix_range_levels(
     max_in = max_out = get_peak_values(clip, color_range)
 
     return fix_levels(clip, gamma, min_in, min_out, max_in, max_out, None, planes)
-
-
-def fix_double_range(clip: vs.VideoNode) -> vs.VideoNode:
-    fix = depth(
-        clip, range_in=ColorRange.LIMITED, range_out=ColorRange.FULL, dither_type=DitherType.ERROR_DIFFUSION
-    )
-
-    return ColorRange.LIMITED.apply(fix)
