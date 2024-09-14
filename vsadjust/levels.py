@@ -1,14 +1,12 @@
 from typing import Sequence
 
 from vstools import (
-    ColorRange, ColorRangeT, FunctionUtil, PlanesT, depth,
-    get_lowest_values, get_peak_values, normalize_seq, scale_value, vs
+    ColorRange, ColorRangeT, FunctionUtil, PlanesT, scale_value,
+    get_lowest_values, get_peak_values, normalize_seq, vs
 )
 
 __all__ = [
-    'fix_levels', 'fix_range_levels',
-
-    'fix_double_range'
+    'fix_levels', 'fix_range_levels'
 ]
 
 
