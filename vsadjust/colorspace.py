@@ -41,7 +41,5 @@ def colorspace_conversion(
         if range_in is not None:
             clip = ColorRange.from_param(range_in).apply(clip)
         resample_kwargs |= dict(range=range.value_zimg)
-    
-    converted = Point.resample(clip, clip, **resample_kwargs)
 
-    return converted
+    return Point.resample(clip, clip, **resample_kwargs)
