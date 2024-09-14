@@ -1,37 +1,45 @@
-from vstools import FunctionUtil, Matrix, vs
+from typing import Any
+
+from vstools import vs, Matrix, Transfer, Primaries, ColorRange
 from vskernels import Point
 
 __all__ = [
-    "fix_colorspace_conversion"
+    'colorspace_conversion'
 ]
 
 
-def fix_colorspace_conversion(
-    clip: vs.VideoNode,
-    matrix_src: Matrix | None = None,
-    matrix_og: Matrix = Matrix.BT470BG,
+def colorspace_conversion(
+        clip: vs.VideoNode,
+        matrix: Matrix = None,
+        transfer: Transfer = None,
+        primaries: Primaries = None,
+        range: ColorRange = None,
+        matrix_in: Matrix = None,
+        transfer_in: Transfer = None,
+        primaries_in: Primaries = None,
+        range_in: ColorRange = None,
 ) -> vs.VideoNode:
-    """
-    Function to fix improper colorspace conversions.
 
-    An example of this would be a BT709 video that was converted
-    to BT470BG during production and tagged as BT709.
+    resample_kwargs = dict[str, Any]()
 
-    :param clip:        Clip to process.
-    :param matrix_src:  The Matrix of the input clip. This will also be the output matrix.
-    :param matrix_og:   The original Matrix that the input clip was converted from.
+    if matrix is not None:
+        if matrix_in is not None:
+            clip = Matrix.from_param(matrix_in).apply(clip)
+        resample_kwargs |= dict(matrix=matrix)
 
-    :return:            Clip with converted Matrix.
-    """
-    func = FunctionUtil(clip, fix_colorspace_conversion, None, vs.YUV, 32)
+    if transfer is not None:
+        if transfer_in is not None:
+            clip = Transfer.from_param(transfer_in).apply(clip)
+        resample_kwargs |= dict(transfer=transfer)
 
-    matrix_src = Matrix.from_param_or_video(matrix_src, clip, True, fix_colorspace_conversion)
-    matrix_og = Matrix.from_param(matrix_og, fix_colorspace_conversion)
+    if primaries is not None:
+        if primaries_in is not None:
+            clip = Primaries.from_param(primaries_in).apply(clip)
+        resample_kwargs |= dict(primaries=primaries)
 
-    if matrix_src == matrix_og:
-        return clip
+    if range is not None:
+        if range_in is not None:
+            clip = ColorRange.from_param(range_in).apply(clip)
+        resample_kwargs |= dict(range=range.value_zimg)
 
-    clip_csp = Point.resample(func.work_clip, func.work_clip, matrix_og, matrix_src)
-    clip_csp = matrix_src.apply(clip_csp)
-
-    return func.return_clip(clip_csp)
+    return Point.resample(clip, clip, **resample_kwargs)
