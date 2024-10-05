@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Sequence
 
 from vsexprtools import ExprOp
-from vstools import CustomIndexError, check_variable, normalize_seq, scale_8bit, vs
+from vstools import ColorRange, CustomIndexError, check_variable, normalize_seq, scale_value, vs
 
 __all__ = [
     'shift_tint'
@@ -34,4 +34,4 @@ def shift_tint(clip: vs.VideoNode, values: int | Sequence[int] = 16) -> vs.Video
     if any(v > 255 or v < -255 for v in val):
         raise CustomIndexError('Every value in "values" must be an 8 bit number!', shift_tint)
 
-    return ExprOp.ADD.combine(clip, suffix=[scale_8bit(clip, v) for v in val])
+    return ExprOp.ADD.combine(clip, suffix=[scale_value(v, 8, clip, ColorRange.FULL) for v in val])
