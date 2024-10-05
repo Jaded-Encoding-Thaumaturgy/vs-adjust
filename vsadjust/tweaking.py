@@ -45,7 +45,7 @@ def tweak_clip(
     luma_max = scale_value(235, **sv_args_out)
     chroma_max = scale_value(240, **sv_args_out, chroma=True)
 
-    chroma_center = get_neutral_value(clip, True)
+    chroma_center = get_neutral_value(clip)
 
     if relative_sat is not None:
         if cont == 1.0 or relative_sat == 1.0:
