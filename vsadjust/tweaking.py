@@ -16,7 +16,7 @@ __all__ = [
     'Tweak',
     'tweak_clip', 'multi_tweak',
 
-    'BalanceMode', 'WeightMode', 'Override',
+    'BalanceMode', 'BalanceWeightMode', 'Override',
 
     'auto_balance'
 ]
@@ -45,7 +45,7 @@ def tweak_clip(
     luma_max = scale_value(235, **sv_args_out)
     chroma_max = scale_value(240, **sv_args_out, chroma=True)
 
-    chroma_center = get_neutral_value(clip, True)
+    chroma_center = get_neutral_value(clip)
 
     if relative_sat is not None:
         if cont == 1.0 or relative_sat == 1.0:
@@ -149,7 +149,7 @@ class BalanceMode(IntEnum):
     DIMMING = 2
 
 
-class WeightMode(IntEnum):
+class BalanceWeightMode(IntEnum):
     INTERPOLATE = 0
     MEDIAN = 1
     MEAN = 2
@@ -161,7 +161,7 @@ class WeightMode(IntEnum):
 class Override(NamedTuple):
     frame_range: FrameRangeN
     cont: SupportsFloat
-    override_mode: WeightMode = WeightMode.INTERPOLATE
+    override_mode: BalanceWeightMode = BalanceWeightMode.INTERPOLATE
 
 
 def auto_balance(
@@ -170,7 +170,7 @@ def auto_balance(
     ref: vs.VideoNode | None = None, radius: int = 1, delta_thr: float = 0.4,
     min_thr: float = 1.0, max_thr: float = 5.0,
     min_thr_tr: float = 1.0, max_thr_tr: float = 5.0,
-    balance_mode: BalanceMode = BalanceMode.UNDIMMING, weight_mode: WeightMode = WeightMode.MEAN,
+    balance_mode: BalanceMode = BalanceMode.UNDIMMING, weight_mode: BalanceWeightMode = BalanceWeightMode.MEAN,
     prop: bool = False
 ) -> vs.VideoNode:
     import numpy as np
@@ -193,12 +193,12 @@ def auto_balance(
         )
     ))
 
-    if weight_mode == WeightMode.NONE:
+    if weight_mode == BalanceWeightMode.NONE:
         raise CustomValueError(auto_balance, 'Global weight mode can\'t be NONE!')
 
     ref_stats = ref_clip.std.PlaneStats()
 
-    over_mapped = list[tuple[range, float, WeightMode]]()
+    over_mapped = list[tuple[range, float, BalanceWeightMode]]()
 
     if frame_overrides:
         frame_overrides = [frame_overrides] if isinstance(frame_overrides, Override) else list(frame_overrides)
@@ -220,7 +220,7 @@ def auto_balance(
     nobalanceclip = clip.std.SetFrameProps(AutoBalance=False) if prop else clip
 
     def _autobalance(n: int, f: Sequence[vs.VideoFrame]) -> vs.VideoNode:
-        override: tuple[range, float, WeightMode] | None = next((x for x in over_mapped if n in x[0]), None)
+        override: tuple[range, float, BalanceWeightMode] | None = next((x for x in over_mapped if n in x[0]), None)
 
         psvalues: Any = np.asarray([
             _weighted(target, get_prop(frame.props, 'PlaneStatsMax', int), zero) for frame in f
@@ -245,10 +245,10 @@ def auto_balance(
 
         psvalues[(abs(psvalues - curr_value) > delta_thr)] = curr_value
 
-        def _get_cont(mode: WeightMode, frange: range) -> Any:
-            if mode == WeightMode.INTERPOLATE:
+        def _get_cont(mode: BalanceWeightMode, frange: range) -> Any:
+            if mode == BalanceWeightMode.INTERPOLATE:
                 if radius < 1:
-                    raise CustomValueError(auto_balance, 'Radius has to be >= 1 with WeightMode.INTERPOLATE!')
+                    raise CustomValueError(auto_balance, 'Radius has to be >= 1 with BalanceWeightMode.INTERPOLATE!')
 
                 weight = (n - (frange.start - 1)) / (frange.stop - (frange.start - 1))
 
@@ -257,16 +257,16 @@ def auto_balance(
 
                 return weighted_prev + weighted_next
 
-            if mode == WeightMode.MEDIAN:
+            if mode == BalanceWeightMode.MEDIAN:
                 return np.median(psvalues)
 
-            if mode == WeightMode.MEAN:
+            if mode == BalanceWeightMode.MEAN:
                 return psvalues.mean()
 
-            if mode == WeightMode.MAX:
+            if mode == BalanceWeightMode.MAX:
                 return psvalues.max()
 
-            if mode == WeightMode.MIN:
+            if mode == BalanceWeightMode.MIN:
                 return psvalues.min()
 
             return psvalues[middle_idx]
@@ -274,7 +274,7 @@ def auto_balance(
         if override:
             frange, cont, override_mode = override
 
-            if override_mode == WeightMode.NONE:
+            if override_mode == BalanceWeightMode.NONE:
                 return nobalanceclip
 
             if cont is not None:
