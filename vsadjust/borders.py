@@ -3,7 +3,10 @@ from __future__ import annotations
 from itertools import chain
 from typing import Sequence
 
-from vstools import CustomEnum, CustomValueError, FunctionUtil, KwargsT, NotFoundEnumValue, PlanesT, core, depth, vs
+from vstools import (
+    CustomEnum, CustomValueError, DependencyNotFoundError,
+    FunctionUtil, KwargsT, NotFoundEnumValue, PlanesT, core, depth, vs
+)
 
 __all__ = [
     'bore'
@@ -41,7 +44,10 @@ class bore(CustomEnum):
                 plugin = core.bore.SinglePlaneWeighted
             else:
                 raise NotFoundEnumValue
-        except AttributeError:
+        except AttributeError as e:
+            if 'No attribute with the name bore' in str(e):
+                raise DependencyNotFoundError(func.func, 'bore')
+
             raise CustomValueError(
                 'Could not find the given Bore function! Make sure you\'re using an up-to-date version of Bore.',
                 func.func, dict(function=self)
