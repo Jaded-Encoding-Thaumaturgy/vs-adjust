@@ -47,10 +47,10 @@ def fix_levels(
     max_out = max_out or max_in
 
     min_in, min_out, max_in, max_out = [
-        list(
+        [
             (y if y <= 1.0 else scale_value(y, input_depth or clip, 32, scale_offsets=True, chroma=i != 0))
             for i, y in enumerate(x)
-        ) for x in (min_in, min_out, max_in, max_out)
+        ] for x in (min_in, min_out, max_in, max_out)
     ]
 
     fix_lvls: vs.VideoNode = func.work_clip

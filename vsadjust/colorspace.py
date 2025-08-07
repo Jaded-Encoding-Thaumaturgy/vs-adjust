@@ -37,7 +37,7 @@ def colorspace_conversion(
 
         matrix = Matrix.from_param(matrix, colorspace_conversion)
 
-        resample_kwargs |= dict(matrix=matrix)
+        resample_kwargs |= {"matrix": matrix}
 
     if transfer is not None:
         if transfer_in is not None:
@@ -45,7 +45,7 @@ def colorspace_conversion(
 
         transfer = Transfer.from_param(transfer, colorspace_conversion)
 
-        resample_kwargs |= dict(transfer=transfer)
+        resample_kwargs |= {"transfer": transfer}
 
     if primaries is not None:
         if primaries_in is not None:
@@ -53,7 +53,7 @@ def colorspace_conversion(
 
         primaries = Primaries.from_param(primaries, colorspace_conversion)
 
-        resample_kwargs |= dict(primaries=primaries)
+        resample_kwargs |= {"primaries": primaries}
 
     if color_range is not None:
         if color_range_in is not None:
@@ -61,7 +61,7 @@ def colorspace_conversion(
 
         color_range = ColorRange.from_param(color_range, colorspace_conversion)
 
-        resample_kwargs |= dict(range=color_range.value_zimg)
+        resample_kwargs |= {"range": color_range.value_zimg}
 
     converted = Point.resample(func.work_clip, func.work_clip, **resample_kwargs)
     return func.return_clip(converted)

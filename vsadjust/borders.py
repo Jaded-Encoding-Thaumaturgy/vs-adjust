@@ -74,11 +74,11 @@ class bore(CustomEnum):
         except AttributeError:
             raise CustomValueError(
                 "Could not find this bore function! Make sure you're using an up-to-date version of Bore.",
-                func.func, dict(function=self)
+                func.func, {"function": self}
             )
         except NotFoundEnumValue:
             raise NotFoundEnumValue(
-                "Invalid bore enum!", func.func, dict(member=self, valid_function=bore.__members__.keys())
+                "Invalid bore enum!", func.func, {"member": self, "valid_function": bore.__members__.keys()}
             )
 
         proc_clip: vs.VideoNode = func.work_clip

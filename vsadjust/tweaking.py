@@ -61,10 +61,7 @@ def tweak_clip(
     chroma_center = get_neutral_value(clip)
 
     if relative_sat is not None:
-        if cont == 1.0 or relative_sat == 1.0:
-            sat = cont
-        else:
-            sat = (cont - 1.0) * relative_sat + 1.0
+        sat = cont if cont == 1.0 or relative_sat == 1.0 else (cont - 1.0) * relative_sat + 1.0
 
     cont = max(cont, 0.0)
     sat = max(sat, 0.0)
@@ -128,7 +125,7 @@ def multi_tweak(clip: vs.VideoNode, tweaks: list[Tweak], debug: bool = False, **
     if len(tweaks) < 2:
         raise ValueError("multi_tweak: 'At least two tweaks need to be passed!'")
 
-    for i, tmp_tweaks in enumerate(zip([tweaks[0]] + tweaks, tweaks, cycle(tweaks[1:]))):
+    for i, tmp_tweaks in enumerate(zip([tweaks[0], *tweaks], tweaks, cycle(tweaks[1:]))):
         tprev, tweak, tnext = [list(filter(None, x)) for x in tmp_tweaks]
 
         if len(tweak) == 1 and len(tprev) > 1 and i > 0:
