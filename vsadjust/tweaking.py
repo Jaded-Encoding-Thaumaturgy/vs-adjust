@@ -7,18 +7,31 @@ from typing import Any, NamedTuple, Sequence, SupportsFloat
 
 from vsexprtools import ExprOp, norm_expr
 from vstools import (
-    ColorRange, CustomValueError, FrameRangeN, StrList, VSFunction, check_variable, fallback, get_depth,
-    get_neutral_value, get_prop, insert_clip, normalize_ranges, scale_value, vs
+    ColorRange,
+    CustomValueError,
+    FrameRangeN,
+    StrList,
+    VSFunction,
+    check_variable,
+    fallback,
+    get_depth,
+    get_neutral_value,
+    get_prop,
+    insert_clip,
+    normalize_ranges,
+    scale_value,
+    vs,
 )
 from vstransitions import EasingT, ExponentialEaseIn, crossfade
 
 __all__ = [
-    'Tweak',
-    'tweak_clip', 'multi_tweak',
-
-    'BalanceMode', 'BalanceWeightMode', 'Override',
-
-    'auto_balance'
+    "BalanceMode",
+    "BalanceWeightMode",
+    "Override",
+    "Tweak",
+    "auto_balance",
+    "multi_tweak",
+    "tweak_clip"
 ]
 
 
@@ -63,8 +76,8 @@ def tweak_clip(
 
     clips = [pre_clip]
 
-    yexpr = list[Any](['x'])
-    cexpr = list[Any](['x'])
+    yexpr = list[Any](["x"])
+    cexpr = list[Any](["x"])
 
     if (hue != 0.0 or sat != 1.0) and clip.format.color_family != vs.GRAY:
         hue *= pi / degrees(pi)
@@ -77,7 +90,7 @@ def tweak_clip(
 
         if hue != 0:
             clips += [pre_clip.std.ShufflePlanes([0, 2, 1], vs.YUV)]
-            cexpr.extend(['y', normalize, hue_sin, sat, ExprOp.MUL * 2, ExprOp.ADD])
+            cexpr.extend(["y", normalize, hue_sin, sat, ExprOp.MUL * 2, ExprOp.ADD])
 
         cexpr.extend([chroma_center, ExprOp.ADD])
 
@@ -181,7 +194,7 @@ def auto_balance(
     assert check_variable(ref_clip, auto_balance)
 
     if ref_clip.format.sample_type is vs.FLOAT:
-        raise CustomValueError(auto_balance, 'Float auto_balance not implemented yet!')
+        raise CustomValueError(auto_balance, "Float auto_balance not implemented yet!")
 
     zero = scale_value(16, 8, ref_clip, range_in, scale_offsets=True)
 
@@ -194,7 +207,7 @@ def auto_balance(
     ))
 
     if weight_mode == BalanceWeightMode.NONE:
-        raise CustomValueError(auto_balance, 'Global weight mode can\'t be NONE!')
+        raise CustomValueError(auto_balance, "Global weight mode can't be NONE!")
 
     ref_stats = ref_clip.std.PlaneStats()
 
@@ -223,7 +236,7 @@ def auto_balance(
         override: tuple[range, float, BalanceWeightMode] | None = next((x for x in over_mapped if n in x[0]), None)
 
         psvalues: Any = np.asarray([
-            _weighted(target, get_prop(frame.props, 'PlaneStatsMax', int), zero) for frame in f
+            _weighted(target, get_prop(frame.props, "PlaneStatsMax", int), zero) for frame in f
         ])
 
         middle_idx = psvalues.size // 2
@@ -248,7 +261,7 @@ def auto_balance(
         def _get_cont(mode: BalanceWeightMode, frange: range) -> Any:
             if mode == BalanceWeightMode.INTERPOLATE:
                 if radius < 1:
-                    raise CustomValueError(auto_balance, 'Radius has to be >= 1 with BalanceWeightMode.INTERPOLATE!')
+                    raise CustomValueError(auto_balance, "Radius has to be >= 1 with BalanceWeightMode.INTERPOLATE!")
 
                 weight = (n - (frange.start - 1)) / (frange.stop - (frange.start - 1))
 

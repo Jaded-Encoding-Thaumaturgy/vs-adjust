@@ -2,11 +2,20 @@ from typing import Any
 
 from vskernels import Point
 from vstools import (
-    FunctionUtil, ColorRange, ColorRangeT, Matrix, MatrixT, Primaries, PrimariesT, Transfer, TransferT, vs
+    ColorRange,
+    ColorRangeT,
+    FunctionUtil,
+    Matrix,
+    MatrixT,
+    Primaries,
+    PrimariesT,
+    Transfer,
+    TransferT,
+    vs,
 )
 
 __all__ = [
-    'colorspace_conversion'
+    "colorspace_conversion"
 ]
 
 
@@ -17,7 +26,7 @@ def colorspace_conversion(
         matrix_in: MatrixT | None = None, transfer_in: TransferT | None = None,
         primaries_in: PrimariesT | None = None, color_range_in: ColorRangeT | None = None,
 ) -> vs.VideoNode:
-    
+
     func = FunctionUtil(clip, colorspace_conversion, bitdepth=32)
 
     resample_kwargs = dict[str, Any]()

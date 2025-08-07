@@ -5,15 +5,24 @@ from typing import Sequence
 
 from vsmasktools import rekt_partial
 from vstools import (
-    CustomEnum, CustomValueError, FunctionUtil, KwargsT, NotFoundEnumValue,
-    PlanesT, ColorRange, get_peak_value, get_lowest_value, core, vs
+    ColorRange,
+    CustomEnum,
+    CustomValueError,
+    FunctionUtil,
+    KwargsT,
+    NotFoundEnumValue,
+    PlanesT,
+    core,
+    get_lowest_value,
+    get_peak_value,
+    vs,
 )
 
 from .levels import fix_levels
 
 __all__ = [
-    'bore',
-    'fix_line_brightness'
+    "bore",
+    "fix_line_brightness"
 ]
 
 
@@ -50,7 +59,7 @@ class bore(CustomEnum):
         values = list(zip(*map(func.norm_seq, (left, right, top, bottom))))
 
         if any(x < 0 for x in chain(*values)):
-            raise CustomValueError('Negative values are not allowed!', func.func)
+            raise CustomValueError("Negative values are not allowed!", func.func)
 
         if not any(x != 0 for x in chain(*values)):
             return clip
@@ -64,12 +73,12 @@ class bore(CustomEnum):
                 raise NotFoundEnumValue
         except AttributeError:
             raise CustomValueError(
-                'Could not find this bore function! Make sure you\'re using an up-to-date version of Bore.',
+                "Could not find this bore function! Make sure you're using an up-to-date version of Bore.",
                 func.func, dict(function=self)
             )
         except NotFoundEnumValue:
             raise NotFoundEnumValue(
-                'Invalid bore enum!', func.func, dict(member=self, valid_function=bore.__members__.keys())
+                "Invalid bore enum!", func.func, dict(member=self, valid_function=bore.__members__.keys())
             )
 
         proc_clip: vs.VideoNode = func.work_clip
